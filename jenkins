@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    
+    stages {
+        
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        
+        stage('Unit Tests') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        
+        stage('Integration Tests') {
+            steps {
+                sh 'mvn verify'
+            }
+        }
+        
+        stage('Code Analysis') {
+            steps {
+                sh 'mvn sonar:sonar'
+            }
+        }
+        
+        stage('Deploy to Dev') {
+            steps {
+                sh 'ansible-playbook -i inventory/dev deploy.yml'
+            }
+        }
+        
+        stage('Deploy to Prod') {
+            steps {
+                sh 'ansible-playbook -i inventory/prod deploy.yml'
+            }
+        }
+    }
+}
