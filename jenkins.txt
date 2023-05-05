@@ -15,9 +15,8 @@ pipeline {
             post{
                 mail to: "sharif7amiri@gmail.com",
                 subject: "built status Email",
-                body: "Build was successful",
+                body: "Build was successful"
             }
-
         }
         stage("Test"){
             steps{
