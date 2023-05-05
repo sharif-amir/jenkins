@@ -12,44 +12,77 @@ pipeline {
                 echo "Build started and completed!"
                 echo "Fetch the source code from the directory path specified by the environment variable"
             }
-            post{
-                mail to: "sharif7amiri@gmail.com",
-                subject: "built status Email",
-                body: "Build was successful"
+                post{
+                    success{
+                        mail to: "${EMAIL_RECIPIENT}",
+                        subject: "Build successful",
+                        body: "The build was successful."
+                    }
+                }
             }
-        }
-        stage("Test"){
+        stage("Unit and integration Test"){
             steps{
-                echo "Test started and completed!"
+                echo "Unit and integration Test started and completed!"
                 echo "Running unit tests and integration tests"
             }
+                post{
+                    success{
+                        emailext attachmentsPattern: '*.log',
+                                 body: "The unit and integration tests were successful.",
+                                 subject: "Unit and integration tests passed",
+                                 to: "${EMAIL_RECIPIENT}"
+                    }
+                    failure{
+                        emailext attachmentsPattern: '*.log',
+                                 body: "The unit and integration tests failed.",
+                                 subject: "Unit and integration tests failed",
+                                 to: "${EMAIL_RECIPIENT}"
+                    }
+                }
         }
-        stage("Code Quality Check"){
+        stage(" Code Analysis"){
             steps{
-                echo "Code Quality Check started and completed!"
+                echo " Code Analysis started and completed!"
                 echo "Check the quality of the code"
             }
         }
-        stage("Deploy"){
+        stage("Security Scan"){
             steps{
-                echo "Deploy started and completed!"
+                echo "Security Scan started and completed!"
                 echo "Deploy the application to a testing environment specified by the environment variable"
             }
+                post{
+                    success{
+                        emailext attachmentsPattern: '*.log',
+                                 body: "The security scan was successful.",
+                                 subject: "Security scan passed",
+                                 to: "${EMAIL_RECIPIENT}"
+                    }
+                    failure{
+                        emailext attachmentsPattern: '*.log',
+                                 body: "The security scan failed.",
+                                 subject: "Security scan failed",
+                                 to: "${EMAIL_RECIPIENT}"
+                    }
+                }
         }
-        stage("Secuirity scan"){
+        stage("Deploy to Staging"){
             steps{
-                echo "Security scan started and completed!"
-                sleep 10
+                echo "${TESTING_ENVIRONMENT}, Deploy to Staging started and completed!"
+                
+            }
+        }
+        stage("Integration Tests on Staging"){
+            steps{
+                echo "Integration Tests on Staging started and completed!"
+                
             }
         }
         stage("Deploy to Production"){
             steps{
-                echo "${TESTING_ENVIRONMENT}, Deploy to Production started and completed!"
+                echo "Deploy to Production started and completed!"
                 
             }
         }
-
     }
 }
-
-
