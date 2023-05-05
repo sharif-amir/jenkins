@@ -4,7 +4,15 @@ pipeline {
         DIRECTORY_PATH= "The path of the code directory being fetched"
         TESTING_ENVIRONMENT= "pipeline"
         PRODUCTION_ENVIRONMENT= "Sharif"
-        EMAIL_RECIPIENT= "4sharifamiri@gmail.com"
+        EMAIL_RECIPIENT= "example@example.com"
+    }
+    post {
+        always {
+            emailext body: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'", 
+            subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'", 
+            attachmentsPattern: '**/*.log', 
+            to: "${EMAIL_RECIPIENT}"
+        }
     }
     stages{
         stage("Build"){
@@ -15,8 +23,24 @@ pipeline {
         }
         stage("Test"){
             steps{
-                echo "Test started and completed!"
-                echo "Running unit tests and integration tests"
+                echo "Test started!"
+                sh "run_unit_tests.sh > test.log"
+                sh "run_integration_tests.sh >> test.log"
+                echo "Test completed!"
+            }
+            post {
+                success {
+                    emailext body: "Test passed!", 
+                    subject: "Test passed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'", 
+                    attachmentsPattern: '**/*.log', 
+                    to: "${EMAIL_RECIPIENT}"
+                }
+                failure {
+                    emailext body: "Test failed!", 
+                    subject: "Test failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'", 
+                    attachmentsPattern: '**/*.log', 
+                    to: "${EMAIL_RECIPIENT}"
+                }
             }
         }
         stage("Code Quality Check"){
@@ -31,10 +55,25 @@ pipeline {
                 echo "Deploy the application to a testing environment specified by the environment variable"
             }
         }
-        stage("Approval"){
+        stage("Security scan"){
             steps{
-                echo "Approval started and completed!"
-                sleep 10
+                echo "Security scan started!"
+                sh "run_security_scan.sh > security_scan.log"
+                echo "Security scan completed!"
+            }
+            post {
+                success {
+                    emailext body: "Security scan passed!", 
+                    subject: "Security scan passed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'", 
+                    attachmentsPattern: '**/*.log', 
+                    to: "${EMAIL_RECIPIENT}"
+                }
+                failure {
+                    emailext body: "Security scan failed!", 
+                    subject: "Security scan failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'", 
+                    attachmentsPattern: '**/*.log', 
+                    to: "${EMAIL_RECIPIENT}"
+                }
             }
         }
         stage("Deploy to Production"){
@@ -46,5 +85,3 @@ pipeline {
 
     }
 }
-
-
