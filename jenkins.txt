@@ -4,7 +4,7 @@ pipeline {
         DIRECTORY_PATH= "The path of the code directory being fetched"
         TESTING_ENVIRONMENT= "pipeline"
         PRODUCTION_ENVIRONMENT= "Sharif"
-        EMAIL_RECIPIENT= "example@example.com"
+        EMAIL_RECIPIENT= "sharif7amiri@gmail.com"
     }
     post {
         always {
